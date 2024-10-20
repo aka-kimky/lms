@@ -3,19 +3,90 @@
 <mapper namespace="atos.lms.schedule.service.dao.InstructorScheduleDAO">
 
 
-    <!-- 강사의 스케줄 조회 -->
-    <select id="selectScheduleByInstructor" parameterType="string" resultType="atos.lms.schedule.service.InstructorScheduleVO">
-        SELECT SCHEDULE_CODE, ID, SCHEDULE_DATE
+
+
+
+<!-- 모든 강사의 스케줄 조회 -->
+<select id="selectAllSchedules" resultType="atos.lms.schedule.service.InstructorScheduleVO">
+    SELECT 
+        S.SCHEDULE_CODE, 
+        S.ID,  <!-- 스케줄 테이블의 ID -->
+        S.MAIN_EVENT,
+        S.START_DATE, 
+        S.END_DATE, 
+        S.ALL_DAY,
+        S.SCHEDULE_COLOR, 
+        I.NAME  <!-- 강사 이름 -->
+    FROM 
+        ATOS_INSTRUCTOR_SCHEDULE S
+    JOIN 
+        ATOS_INSTRUCTOR I ON S.ID = I.ID
+</select>
+
+<!-- 강사별 스케줄 조회 -->
+<select id="selectScheduleByInstructor" resultType="atos.lms.schedule.service.InstructorScheduleVO">
+    SELECT 
+        S.SCHEDULE_CODE, 
+        S.ID,  <!-- 스케줄 테이블의 ID -->
+        S.MAIN_EVENT,
+        S.START_DATE, 
+        S.END_DATE, 
+        S.ALL_DAY,
+        S.SCHEDULE_COLOR,
+        I.NAME  <!-- 강사 이름 -->
+    FROM 
+        ATOS_INSTRUCTOR_SCHEDULE S
+    JOIN 
+        ATOS_INSTRUCTOR I ON S.ID = I.ID
+    WHERE 
+        S.ID = #{id}  <!-- 동적으로 전달된 ID를 사용 -->
+</select>
+
+
+<!-- 스케줄 총 개수 조회 -->
+    <select id="selectScheduleCountByInstructor" resultType="int">
+        SELECT COUNT(SCHEDULE_CODE)
         FROM ATOS_INSTRUCTOR_SCHEDULE
-        WHERE ID = #{instructorId}
+        WHERE ID = #{id}  <!-- 동적으로 전달된 ID를 사용 -->
     </select>
 
-    <!-- 스케줄 등록 -->
+
+
+<!-- 모든 강사 목록 조회 -->
+    <select id="selectAllInstructors" resultType="atos.lms.schedule.service.InstructorScheduleVO">
+        SELECT ID, NAME
+        FROM ATOS_INSTRUCTOR  <!-- 강사 목록 조회 -->
+    </select>
+    
+    
+
+<!-- 새로운 스케줄 등록 -->
     <insert id="insertSchedule" parameterType="atos.lms.schedule.service.InstructorScheduleVO">
-        INSERT INTO ATOS_INSTRUCTOR_SCHEDULE (ID, SCHEDULE_DATE)
-        VALUES (#{id}, #{scheduleDate})
+        INSERT INTO ATOS_INSTRUCTOR_SCHEDULE
+        (ID, MAIN_EVENT, START_DATE, END_DATE, SCHEDULE_COLOR)
+        VALUES
+        (#{id}, #{mainEvent}, #{startDate}, #{endDate}, #{scheduleColor})
     </insert>
-
-
+    
+    
+<!-- 스케줄 수정 -->
+	<update id="updateSchedule" parameterType="atos.lms.schedule.service.InstructorScheduleVO">
+	    UPDATE ATOS_INSTRUCTOR_SCHEDULE
+	    SET 
+	        MAIN_EVENT = #{mainEvent},
+	        START_DATE = #{startDate},
+	        END_DATE = #{endDate},
+	        SCHEDULE_COLOR = #{scheduleColor},
+	         `ID`  = #{id} 
+	    WHERE 
+	        SCHEDULE_CODE = #{scheduleCode}
+	</update>
+	
+	
+<!-- 스케줄 삭제 -->
+	<delete id="deleteSchedule" parameterType="atos.lms.schedule.service.InstructorScheduleVO">
+	    DELETE FROM ATOS_INSTRUCTOR_SCHEDULE
+	    WHERE SCHEDULE_CODE = #{scheduleCode}
+	</delete>
 
 </mapper>
